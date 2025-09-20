@@ -28,10 +28,18 @@ pub struct ServerConfig {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct SslConfig {
     pub enabled: bool,
-    pub cert_path: String,
-    pub key_path: String,
+    pub https_port: u16,
+    pub cert_path: Option<String>,
+    pub key_path: Option<String>,
     pub protocols: Vec<String>,
     pub ciphers: Vec<String>,
+    pub auto_provision: bool,
+    pub acme_directory_url: String,
+    pub acme_email: String,
+    pub storage_path: Option<std::path::PathBuf>,
+    #[serde(with = "duration_serde")]
+    pub renewal_check_interval: Duration,
+    pub domains: Vec<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -180,6 +188,18 @@ pub struct CachingConfig {
     pub default_ttl: Duration,
     pub max_size: String,
     pub rules: Vec<CacheRule>,
+    pub redis: RedisCacheConfig,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct RedisCacheConfig {
+    pub enabled: bool,
+    pub host: String,
+    pub port: u16,
+    pub db: u8,
+    pub password: Option<String>,
+    #[serde(with = "duration_serde")]
+    pub timeout: Duration,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -342,11 +362,13 @@ impl Config {
         
         // Validate SSL config
         if self.ssl.enabled {
-            if self.ssl.cert_path.is_empty() {
-                anyhow::bail!("SSL cert_path cannot be empty when SSL is enabled");
-            }
-            if self.ssl.key_path.is_empty() {
-                anyhow::bail!("SSL key_path cannot be empty when SSL is enabled");
+            if !self.ssl.auto_provision {
+                if self.ssl.cert_path.as_ref().map_or(true, |s| s.is_empty()) {
+                    anyhow::bail!("SSL cert_path cannot be empty when SSL is enabled and auto_provision is false");
+                }
+                if self.ssl.key_path.as_ref().map_or(true, |s| s.is_empty()) {
+                    anyhow::bail!("SSL key_path cannot be empty when SSL is enabled and auto_provision is false");
+                }
             }
         }
         

@@ -24,6 +24,9 @@ pub enum WafProxyError {
     #[error("SSL/TLS error: {0}")]
     Ssl(String),
     
+    #[error("Certificate error for domain {domain}: {error}")]
+    CertificateError { domain: String, error: String },
+    
     #[error("Authentication failed: {0}")]
     Auth(String),
     
@@ -75,6 +78,7 @@ impl WafProxyError {
             WafProxyError::Upstream(_) => StatusCode::BAD_GATEWAY,
             WafProxyError::Config(_) => StatusCode::INTERNAL_SERVER_ERROR,
             WafProxyError::Ssl(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            WafProxyError::CertificateError { .. } => StatusCode::INTERNAL_SERVER_ERROR,
             WafProxyError::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
             WafProxyError::Database(_) => StatusCode::INTERNAL_SERVER_ERROR,
             WafProxyError::Redis(_) => StatusCode::INTERNAL_SERVER_ERROR,
@@ -97,6 +101,7 @@ impl WafProxyError {
             WafProxyError::Upstream(_) => "UPSTREAM_ERROR",
             WafProxyError::Config(_) => "CONFIG_ERROR",
             WafProxyError::Ssl(_) => "SSL_ERROR",
+            WafProxyError::CertificateError { .. } => "CERTIFICATE_ERROR",
             WafProxyError::Internal(_) => "INTERNAL_ERROR",
             WafProxyError::Database(_) => "DATABASE_ERROR",
             WafProxyError::Redis(_) => "REDIS_ERROR",

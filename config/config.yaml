@@ -3,14 +3,22 @@ server:
   host: "0.0.0.0"
   port: 8080
   workers: 4
-  max_connections: 10000
-  
+  max_connections: 1000
+
+# SSL/TLS Configuration
 ssl:
-  enabled: true
-  cert_path: "/etc/ssl/certs/server.crt"
-  key_path: "/etc/ssl/private/server.key"
-  protocols: ["TLSv1.2", "TLSv1.3"]
-  ciphers: ["ECDHE-ECDSA-AES256-GCM-SHA384", "ECDHE-RSA-AES256-GCM-SHA384"]
+  enabled: false  # Set to true to enable HTTPS
+  https_port: 8443
+  cert_path: null  # Path to certificate file (optional if auto-provisioning)
+  key_path: null   # Path to private key file (optional if auto-provisioning)
+  protocols: ["TLS1.2", "TLS1.3"]
+  ciphers: ["TLS13_AES_256_GCM_SHA384", "TLS13_AES_128_GCM_SHA256"]
+  auto_provision: false  # Enable automatic Let's Encrypt certificates
+  acme_directory_url: "https://acme-v02.api.letsencrypt.org/directory"  # Let's Encrypt production
+  acme_email: "admin@example.com"  # Email for Let's Encrypt account
+  storage_path: "./certs"  # Directory to store certificates
+  renewal_check_interval: "1h"  # How often to check for certificate renewal
+  domains: []  # List of domains for automatic certificate provisioning
 
 # WAF Configuration
 waf:
@@ -40,6 +48,7 @@ waf:
     csrf_protection:
       enabled: true
       require_token: true
+      confidence_threshold: 0.8
     rce_protection:
       enabled: true
       confidence_threshold: 0.9
@@ -127,6 +136,15 @@ proxy:
     enabled: true
     default_ttl: 300s
     max_size: "1GB"
+    
+    # Redis cache backend (optional - falls back to in-memory)
+    redis:
+      enabled: false  # Set to true to use Redis for caching
+      host: "127.0.0.1"
+      port: 6379
+      db: 1
+      password: null  # Set if Redis requires authentication
+      timeout: 5s
     
     # Cache rules
     rules:

@@ -11,6 +11,7 @@ mod observability;
 mod admin;
 mod security;
 mod health;
+mod ssl;
 mod error;
 
 use config::Config;
@@ -19,6 +20,7 @@ use proxy::ReverseProxy;
 use observability::{MetricsCollector, Logger};
 use admin::AdminServer;
 use health::HealthChecker;
+use ssl::SslManager;
 
 #[derive(Parser, Debug)]
 #[command(name = "waf-reverse-proxy")]
@@ -61,6 +63,13 @@ async fn main() -> Result<()> {
     let metrics_collector = Arc::new(MetricsCollector::new(&config.metrics)?);
     let logger = Arc::new(Logger::new(&config.logging)?);
     let health_checker = Arc::new(HealthChecker::new());
+    
+    // Initialize SSL manager if SSL is enabled
+    let ssl_manager = if config.ssl.enabled {
+        Some(Arc::new(SslManager::new(config.ssl.clone()).await?))
+    } else {
+        None
+    };
     
     // Initialize WAF engine
     let waf_engine = Arc::new(WafEngine::new(&config.waf, metrics_collector.clone()).await?);
