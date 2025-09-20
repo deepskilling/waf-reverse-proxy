@@ -1,0 +1,232 @@
+# WAF + Reverse Proxy Configuration
+server:
+  host: "0.0.0.0"
+  port: 8080
+  workers: 4
+  max_connections: 10000
+  
+ssl:
+  enabled: true
+  cert_path: "/etc/ssl/certs/server.crt"
+  key_path: "/etc/ssl/private/server.key"
+  protocols: ["TLSv1.2", "TLSv1.3"]
+  ciphers: ["ECDHE-ECDSA-AES256-GCM-SHA384", "ECDHE-RSA-AES256-GCM-SHA384"]
+
+# WAF Configuration
+waf:
+  enabled: true
+  mode: "block" # block, monitor, log
+  
+  # Rate limiting
+  rate_limiting:
+    global:
+      requests_per_second: 1000
+      burst: 2000
+    per_ip:
+      requests_per_minute: 300
+      burst: 500
+    per_endpoint:
+      requests_per_minute: 500
+      burst: 1000
+  
+  # OWASP Top 10 Protection
+  owasp_protection:
+    sql_injection:
+      enabled: true
+      confidence_threshold: 0.8
+    xss_protection:
+      enabled: true
+      confidence_threshold: 0.8
+    csrf_protection:
+      enabled: true
+      require_token: true
+    rce_protection:
+      enabled: true
+      confidence_threshold: 0.9
+    path_traversal:
+      enabled: true
+      confidence_threshold: 0.9
+  
+  # Bot protection
+  bot_protection:
+    enabled: true
+    challenge_suspicious: true
+    block_known_bots: true
+    user_agent_analysis: true
+    behavioral_analysis: true
+  
+  # Geo-blocking
+  geo_blocking:
+    enabled: false
+    blocked_countries: ["CN", "RU"]
+    allowed_countries: []
+    geodb_path: "/etc/waf/GeoLite2-Country.mmdb"
+  
+  # Custom rules
+  custom_rules:
+    - name: "Block admin access from untrusted IPs"
+      pattern: "^/admin"
+      action: "block"
+      conditions:
+        - type: "path_regex"
+          value: "^/admin.*"
+        - type: "ip_not_in_whitelist"
+          value: ["192.168.1.0/24", "10.0.0.0/8"]
+    
+    - name: "API rate limiting"
+      pattern: "^/api"
+      action: "rate_limit"
+      conditions:
+        - type: "path_prefix"
+          value: "/api"
+      rate_limit:
+        requests_per_minute: 100
+        burst: 200
+
+# Reverse Proxy Configuration
+proxy:
+  # Upstream servers
+  upstreams:
+    default:
+      servers:
+        - url: "http://127.0.0.1:3000"
+          weight: 1
+          max_fails: 3
+          fail_timeout: 30s
+        - url: "http://127.0.0.1:3001"
+          weight: 1
+          max_fails: 3
+          fail_timeout: 30s
+      
+      # Load balancing strategy
+      load_balancer: "round_robin" # round_robin, least_connections, ip_hash
+      
+      # Health checks
+      health_check:
+        enabled: true
+        path: "/health"
+        interval: 30s
+        timeout: 5s
+        healthy_threshold: 2
+        unhealthy_threshold: 3
+  
+  # Routing rules
+  routes:
+    - host: "api.example.com"
+      path: "/v1"
+      upstream: "default"
+      strip_path: false
+    
+    - host: "www.example.com"
+      path: "/"
+      upstream: "default"
+      strip_path: false
+  
+  # Caching
+  caching:
+    enabled: true
+    default_ttl: 300s
+    max_size: "1GB"
+    
+    # Cache rules
+    rules:
+      - pattern: "^/static/"
+        ttl: 86400s
+        vary_headers: ["Accept-Encoding"]
+      
+      - pattern: "^/api/.*"
+        ttl: 60s
+        conditions:
+          - method: "GET"
+          - no_auth_header: true
+
+# Observability
+logging:
+  level: "info" # trace, debug, info, warn, error
+  format: "json" # json, pretty
+  output: "stdout" # stdout, file, syslog
+  file_path: "/var/log/waf-proxy.log"
+  
+  # Access logs
+  access_log:
+    enabled: true
+    format: "combined" # combined, common, custom
+    output: "/var/log/access.log"
+  
+  # Security logs
+  security_log:
+    enabled: true
+    output: "/var/log/security.log"
+    include_request_body: false
+    include_response_body: false
+
+metrics:
+  enabled: true
+  port: 9090
+  path: "/metrics"
+  
+  # Custom metrics
+  custom_metrics:
+    - name: "waf_blocks_total"
+      type: "counter"
+      help: "Total number of blocked requests"
+    
+    - name: "proxy_request_duration"
+      type: "histogram"
+      help: "Request duration in seconds"
+
+# Redis for session storage and caching
+redis:
+  enabled: true
+  host: "127.0.0.1"
+  port: 6379
+  database: 0
+  password: ""
+  pool_size: 10
+
+# Admin API
+admin:
+  enabled: true
+  port: 8081
+  auth:
+    enabled: true
+    username: "admin"
+    password_hash: "$argon2id$v=19$m=19456,t=2,p=1$..."
+  
+  endpoints:
+    - path: "/config"
+      methods: ["GET", "POST"]
+    - path: "/metrics"
+      methods: ["GET"]
+    - path: "/health"
+      methods: ["GET"]
+
+# Advanced features
+advanced:
+  # Circuit breaker
+  circuit_breaker:
+    enabled: true
+    failure_threshold: 5
+    recovery_timeout: 60s
+    half_open_max_calls: 3
+  
+  # JWT validation
+  jwt:
+    enabled: false
+    secret: "your-secret-key"
+    algorithm: "HS256"
+    required_claims: ["sub", "exp"]
+  
+  # Machine learning anomaly detection
+  ml_anomaly_detection:
+    enabled: false
+    model_path: "/etc/waf/anomaly_model.bin"
+    confidence_threshold: 0.7
+  
+  # Threat intelligence
+  threat_intelligence:
+    enabled: false
+    feeds:
+      - url: "https://example.com/threat-feed.json"
+        format: "json"
+        update_interval: 3600s

@@ -1,0 +1,94 @@
+# Rust
+target/
+Cargo.lock
+*.pdb
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+
+# SSL certificates
+*.pem
+*.key
+*.crt
+
+# Database
+*.db
+*.sqlite
+
+# Cache
+cache/
+
+# Runtime
+pid
+*.pid
+
+# Config overrides
+config.local.yaml
+config.override.yaml
+
+# Documentation build
+docs/_build/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Package files
+*.tar.gz
+*.zip
+
+# Editor backups
+*~
+*.bak
+
+# JetBrains
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Vim
+*.swp
+*.swo
+*~
+Session.vim
+.netrwhist
+
+# System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
