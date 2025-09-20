@@ -79,9 +79,17 @@ Built following SOLID principles with a modular architecture:
 
 ## 📚 Documentation
 
-- **[SETUP.md](SETUP.md)** - Comprehensive installation and configuration guide
-- **[LICENSE](LICENSE)** - MIT License with Deepskilling branding terms
-- **API Documentation** - Available at `/api/docs` when running
+### 🚀 **Quick Start Guides**
+- **[docs/QUICKSTART.md](docs/QUICKSTART.md)** - **Choose Your Implementation** (Rust vs Python)
+- **[docs/RUST_QUICKSTART.md](docs/RUST_QUICKSTART.md)** - Complete Rust implementation guide with examples
+- **[docs/PYTHON_QUICKSTART.md](docs/PYTHON_QUICKSTART.md)** - Comprehensive Python tutorial (1,009 lines)
+
+### 📖 **Detailed Documentation**  
+- **[docs/FEATURES_COMPREHENSIVE.md](docs/FEATURES_COMPREHENSIVE.md)** - **Complete feature specification** with examples
+- **[docs/TECHNICAL_SPECIFICATION.md](docs/TECHNICAL_SPECIFICATION.md)** - **Technical architecture & API specs**
+- **[docs/SETUP.md](docs/SETUP.md)** - Comprehensive installation and configuration guide
+- **[docs/LICENSE](docs/LICENSE)** - MIT License with Deepskilling branding terms
+- **API Documentation** - Available at `/api/docs` when running (both implementations)
 
 ## ⚡ Quick Start
 
