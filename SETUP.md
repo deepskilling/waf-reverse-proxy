@@ -477,13 +477,28 @@ caching:
 curl http://localhost:9090/metrics | grep proxy_
 
 # Load testing
+
+## Option 1: Python Load Tester (Recommended)
+# Install dependencies
+pip install -r requirements.txt
+
+# Basic load test
+python load_test.py --url http://localhost:8080
+
+# High concurrency test  
+python load_test.py --url http://localhost:8080 --concurrency 100 --duration 60
+
+# Custom configuration
+python load_test.py --url http://localhost:8080 --concurrency 50 --duration 30
+
+## Option 2: WRK Load Tester (Alternative)
 # Install wrk
 sudo apt-get install wrk
 
 # Basic load test
 wrk -t12 -c400 -d30s http://localhost:8080/
 
-# Advanced load test with custom script
+# Advanced load test with Lua script
 wrk -t12 -c400 -d30s -s load_test.lua http://localhost:8080/
 ```
 

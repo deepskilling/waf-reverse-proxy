@@ -3,6 +3,7 @@
 
 # Core dependencies
 requests>=2.28.0      # HTTP client for health checks and API calls
+aiohttp>=3.9.0        # Async HTTP client for load testing
 PyYAML>=6.0          # YAML parsing for configuration files
 psutil>=5.9.0        # System and process monitoring (optional)
 
