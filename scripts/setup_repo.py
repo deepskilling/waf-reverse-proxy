@@ -321,7 +321,7 @@ class GitSetup:
         
         print(f"\n{Colors.HEADER}🔧 Local Development:{Colors.ENDC}")
         print("   cargo build --release")
-        print("   ./target/release/waf-reverse-proxy --config config.yaml")
+        print("   ./target/release/waf-reverse-proxy --config config/config.yaml")
         
         print(f"\n{Colors.HEADER}🐳 Docker Deployment:{Colors.ENDC}")
         print("   docker-compose up -d")

@@ -92,7 +92,7 @@ cd waf-reverse-proxy
 
 # 2. Quick build and run
 cargo build --release
-cp config.yaml config.local.yaml
+cp config/config.yaml config.local.yaml
 ./target/release/waf-reverse-proxy --config config.local.yaml
 
 # 3. Verify it's working
@@ -105,13 +105,13 @@ curl http://localhost:8081/api/status # Admin API status
 ### Option 1: Automated Setup (Recommended)
 ```bash
 # Install dependencies and set up environment
-pip install -r requirements.txt
-python setup.py all                 # Complete automated setup
+pip install -r config/requirements.txt
+python scripts/setup.py all                 # Complete automated setup
 
 # Or step-by-step
-python setup.py init               # Initialize project
-python setup.py deploy --docker    # Docker deployment
-python health_check.py --full      # Health verification
+python scripts/setup.py init               # Initialize project
+python scripts/setup.py deploy --docker    # Docker deployment
+python scripts/health_check.py --full      # Health verification
 ```
 
 ### Option 2: Docker Deployment
@@ -147,16 +147,16 @@ The project includes comprehensive Python setup scripts for easy deployment:
 
 ```bash
 # Initialize everything
-python3 setup.py all
+python3 scripts/setup.py all
 
 # Set up Git repository
-python3 setup_repo.py
+python3 scripts/setup_repo.py
 
 # Set up deployment environment  
-python3 setup_deployment.py --docker --monitoring
+python3 scripts/setup_deployment.py --docker --monitoring
 
 # Run health checks
-python3 health_check.py --full --json
+python3 scripts/health_check.py --full --json
 ```
 
 ### Basic Configuration

@@ -72,7 +72,7 @@ class MainSetup:
     """Main setup orchestrator"""
     
     def __init__(self, quiet=False, json_output=False):
-        self.project_root = Path(__file__).parent
+        self.project_root = Path(__file__).parent.parent
         self.quiet = quiet
         self.json_output = json_output
         self.results = {}
@@ -141,7 +141,7 @@ class MainSetup:
         """Install Python dependencies"""
         self.log("\n📦 Installing Python dependencies...", "info")
         
-        requirements_file = self.project_root / "requirements.txt"
+        requirements_file = self.project_root / "config" / "requirements.txt"
         if not requirements_file.exists():
             self.log("⚠️  requirements.txt not found, skipping", "warning")
             return True
@@ -171,11 +171,11 @@ class MainSetup:
         
         required_files = [
             "Cargo.toml",
-            "config.yaml", 
+            "config/config.yaml", 
             "src/main.rs",
             "README.md",
-            "Dockerfile",
-            "docker-compose.yml"
+            "deployment/docker/Dockerfile",
+            "deployment/docker/docker-compose.yml"
         ]
         
         optional_files = [
@@ -441,9 +441,9 @@ metrics:
             self.log("\n🎉 Setup completed successfully!", "success")
             self.log("\n📋 Next Steps:", "header")
             self.log("1. 🔨 Build the project: cargo build --release", "info")
-            self.log("2. 🚀 Start the service: ./target/release/waf-reverse-proxy --config config.yaml", "info") 
-            self.log("3. 🧪 Run health check: python3 health_check.py --full", "info")
-            self.log("4. 🐳 Or use Docker: docker-compose up -d", "info")
+            self.log("2. 🚀 Start the service: ./target/release/waf-reverse-proxy --config config/config.yaml", "info") 
+            self.log("3. 🧪 Run health check: python3 scripts/health_check.py --full", "info")
+            self.log("4. 🐳 Or use Docker: docker-compose -f deployment/docker/docker-compose.yml up -d", "info")
             self.log("5. 🌐 Visit http://localhost:8080 to test", "info")
         else:
             self.log("\n⚠️  Setup completed with some issues", "warning")

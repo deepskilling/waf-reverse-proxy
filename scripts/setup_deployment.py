@@ -48,8 +48,8 @@ class DeploymentSetup:
     """Handles deployment setup tasks"""
     
     def __init__(self):
-        self.project_root = Path(__file__).parent
-        self.config_file = self.project_root / "config.yaml"
+        self.project_root = Path(__file__).parent.parent
+        self.config_file = self.project_root / "config" / "config.yaml"
         
     def print_header(self):
         """Print welcome header"""

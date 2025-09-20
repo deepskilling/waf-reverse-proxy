@@ -59,8 +59,8 @@ class HealthChecker:
     """Comprehensive health checking for WAF + Reverse Proxy"""
     
     def __init__(self, quiet=False, json_output=False):
-        self.project_root = Path(__file__).parent
-        self.config_file = self.project_root / "config.yaml"
+        self.project_root = Path(__file__).parent.parent
+        self.config_file = self.project_root / "config" / "config.yaml"
         self.quiet = quiet
         self.json_output = json_output
         self.results = {}
