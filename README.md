@@ -1,6 +1,11 @@
-# WAF + Reverse Proxy
+# WAF + Reverse Proxy by Deepskilling
 
-A high-performance Web Application Firewall (WAF) and Reverse Proxy built in Rust, designed with reliability, scalability, and availability in mind.
+![Deepskilling](https://img.shields.io/badge/powered%20by-deepskilling-blue)
+![Rust](https://img.shields.io/badge/rust-%23000000.svg?style=flat&logo=rust&logoColor=white)
+![Security](https://img.shields.io/badge/security-enterprise-green)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+
+A high-performance, enterprise-grade Web Application Firewall (WAF) and Reverse Proxy built in Rust by **Deepskilling**. Designed with reliability, scalability, and availability in mind to protect and accelerate your web applications.
 
 ## 🚀 Features
 
@@ -72,24 +77,64 @@ Built following SOLID principles with a modular architecture:
 - Redis (optional, for session storage)
 - MaxMind GeoIP database (optional, for geo-blocking)
 
-### Installation
+## 📚 Documentation
+
+- **[SETUP.md](SETUP.md)** - Comprehensive installation and configuration guide
+- **[LICENSE](LICENSE)** - MIT License with Deepskilling branding terms
+- **API Documentation** - Available at `/api/docs` when running
+
+## ⚡ Quick Start
 
 ```bash
-# Clone the repository
-git clone <repository-url>
+# 1. Clone the repository
+git clone https://github.com/deepskilling/waf-reverse-proxy.git
 cd waf-reverse-proxy
 
-# Quick setup with Python scripts (recommended)
-python3 setup.py init              # Initialize project and dependencies
-python3 setup.py deploy --docker   # Set up Docker environment
-python3 health_check.py --full     # Verify everything works
-
-# Or build manually
+# 2. Quick build and run
 cargo build --release
+cp config.yaml config.local.yaml
+./target/release/waf-reverse-proxy --config config.local.yaml
 
-# Run with default configuration
-cargo run -- --config config.yaml
+# 3. Verify it's working
+curl http://localhost:8080/health    # Main proxy health
+curl http://localhost:8081/api/status # Admin API status
 ```
+
+## 📦 Installation Options
+
+### Option 1: Automated Setup (Recommended)
+```bash
+# Install dependencies and set up environment
+pip install -r requirements.txt
+python setup.py all                 # Complete automated setup
+
+# Or step-by-step
+python setup.py init               # Initialize project
+python setup.py deploy --docker    # Docker deployment
+python health_check.py --full      # Health verification
+```
+
+### Option 2: Docker Deployment
+```bash
+# Quick start with Docker Compose
+docker-compose up -d
+
+# Custom build
+docker build -t deepskilling/waf-reverse-proxy .
+docker run -p 8080:8080 deepskilling/waf-reverse-proxy
+```
+
+### Option 3: Manual Build
+```bash
+# Install Rust (if needed)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# Build and install
+cargo build --release
+sudo cp target/release/waf-reverse-proxy /usr/local/bin/
+```
+
+> **📖 For detailed installation, configuration, and deployment instructions, see [SETUP.md](SETUP.md)**
 
 ### 🐍 Python Setup Scripts
 
@@ -387,13 +432,15 @@ cargo tarpaulin --out Html
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License with Deepskilling branding terms - see the [LICENSE](LICENSE) file for details.
 
-## 🤝 Support
+## 🤝 Support & Community
 
-- **Documentation**: See the `docs/` directory for detailed guides
-- **Issues**: Report bugs and feature requests on GitHub
-- **Discussions**: Join the community discussions
+- **📖 Complete Setup Guide**: [SETUP.md](SETUP.md)
+- **🐛 Issues & Bugs**: [GitHub Issues](https://github.com/deepskilling/waf-reverse-proxy/issues)
+- **💬 Discussions**: [GitHub Discussions](https://github.com/deepskilling/waf-reverse-proxy/discussions)
+- **📧 Enterprise Support**: Contact Deepskilling for commercial support
+- **🌟 Star us on GitHub**: Show your support for the project
 
 ## 🗺️ Roadmap
 
@@ -441,4 +488,10 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Horizontal scaling support
 - Cloud provider integration
 
-This WAF + Reverse Proxy solution provides enterprise-grade security and performance while maintaining the flexibility and reliability needed for modern applications.
+---
+
+**Built with ❤️ by [Deepskilling](https://deepskilling.com)**
+
+This enterprise-grade WAF + Reverse Proxy solution demonstrates Deepskilling's commitment to delivering high-performance, secure, and scalable infrastructure solutions. Built in Rust for maximum performance and reliability, it's designed to protect and accelerate modern web applications and microservices architectures.
+
+*© 2025 Deepskilling. All rights reserved. | Empowering organizations with cutting-edge security solutions.*
