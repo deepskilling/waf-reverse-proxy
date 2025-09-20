@@ -1,0 +1,244 @@
+# PyWAF Configuration File
+# Complete Python implementation of WAF + Reverse Proxy by Deepskilling
+
+# Environment settings
+environment: "production"
+debug: false
+
+# Server configuration
+server:
+  host: "0.0.0.0"
+  port: 8080
+  workers: 4
+  max_connections: 1000
+  keepalive_timeout: 60
+
+# SSL/TLS configuration
+ssl:
+  enabled: false  # Set to true to enable HTTPS
+  port: 8443
+  cert_file: null  # Path to certificate file (required if auto_provision is false)
+  key_file: null   # Path to private key file (required if auto_provision is false)
+  
+  # Let's Encrypt / ACME auto-provisioning
+  auto_provision: false  # Set to true for automatic certificate provisioning
+  acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
+  acme_email: "admin@example.com"  # Required for auto-provisioning
+  domains: []  # List of domains for auto-provisioning (required if auto_provision is true)
+  
+  # SSL settings
+  protocols: ["TLSv1.2", "TLSv1.3"]
+  ciphers: null  # Use defaults
+  
+  # Certificate storage and renewal
+  cert_dir: "./certs"
+  renewal_days: 30
+
+# WAF configuration
+waf:
+  enabled: true
+  mode: "block"  # Options: block, monitor, log, off
+  
+  # Rate limiting
+  rate_limiting:
+    global_limit:
+      requests_per_second: 100
+      burst: 200
+    
+    per_ip:
+      requests_per_minute: 1000
+      burst: 500
+    
+    per_endpoint:
+      requests_per_second: 10
+      burst: 20
+  
+  # OWASP Top 10 protection
+  owasp_protection:
+    enabled: true
+    
+    # Individual protections
+    sql_injection: true
+    xss_protection: true
+    csrf_protection: true
+    rce_protection: true
+    path_traversal: true
+    
+    # Confidence thresholds (0.0 to 1.0)
+    sql_injection_threshold: 0.8
+    xss_threshold: 0.8
+    csrf_threshold: 0.7
+    rce_threshold: 0.9
+    path_traversal_threshold: 0.9
+  
+  # Bot protection
+  bot_protection:
+    enabled: true
+    
+    # Detection methods
+    user_agent_analysis: true
+    behavioral_analysis: true
+    challenge_response: true
+    
+    # Bot handling
+    block_known_bots: true
+    challenge_suspicious: true
+    
+    # Thresholds
+    suspicious_threshold: 0.7
+    bot_threshold: 0.8
+  
+  # Geographic blocking
+  geo_blocking:
+    enabled: false  # Set to true to enable geo-blocking
+    blocked_countries: []  # List of ISO 3166-1 alpha-2 country codes (e.g., ["CN", "RU"])
+    allowed_countries: []  # If specified, only these countries are allowed
+    geoip_database: "./geoip/GeoLite2-Country.mmdb"
+    update_interval: 86400  # Database update interval in seconds
+  
+  # Custom rules
+  custom_rules:
+    - name: "block_admin_access"
+      enabled: false
+      priority: 100
+      action: "block"
+      conditions:
+        - type: "path_prefix"
+          field: "path"
+          operator: "equals"
+          value: "/admin"
+          case_sensitive: false
+      description: "Block access to admin paths"
+      tags: ["admin", "security"]
+
+# Reverse proxy configuration
+proxy:
+  # Upstream servers
+  upstreams:
+    - name: "backend"
+      servers:
+        - url: "http://127.0.0.1:8081"
+          weight: 100
+          backup: false
+          max_fails: 3
+          fail_timeout: 30
+      algorithm: "round_robin"  # Options: round_robin, least_connections, ip_hash, weighted, random
+      health_check:
+        enabled: true
+        interval: 30
+        timeout: 5
+        path: "/health"
+        expected_codes: [200]
+        healthy_threshold: 2
+        unhealthy_threshold: 3
+      keepalive: 64
+      connect_timeout: 5
+      read_timeout: 30
+  
+  # Routing rules
+  routes:
+    - path: "/api/.*"
+      upstream: "backend"
+      host: null  # Optional host pattern
+      methods: ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"]
+      strip_path: false
+      add_headers:
+        X-Forwarded-By: "PyWAF"
+      remove_headers: []
+    
+    - path: "/.*"
+      upstream: "backend"
+      methods: ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"]
+      strip_path: false
+      add_headers: {}
+      remove_headers: []
+  
+  # Default upstream for unmatched routes
+  default_upstream: "backend"
+  
+  # Caching configuration
+  cache:
+    enabled: true
+    backend: "memory"  # Options: memory, redis, hybrid
+    max_size: 104857600  # 100MB in bytes
+    max_entries: 10000
+    default_ttl: 300  # Default TTL in seconds
+    
+    # Redis settings (if backend is redis or hybrid)
+    redis_url: null  # "redis://localhost:6379/1"
+    redis_prefix: "pywaf:cache:"
+    
+    # Cache rules
+    rules:
+      - pattern: "^/static/.*"
+        ttl: 86400  # 24 hours
+        vary_headers: ["Accept-Encoding"]
+        methods: ["GET", "HEAD"]
+        status_codes: [200, 301, 302, 404]
+      
+      - pattern: "^/api/.*"
+        ttl: 60  # 1 minute
+        vary_headers: ["Authorization"]
+        methods: ["GET"]
+        status_codes: [200]
+  
+  # Proxy settings
+  buffer_size: 4096
+  max_body_size: 10485760  # 10MB
+
+# Logging configuration
+logging:
+  level: "info"  # Options: trace, debug, info, warning, error, critical
+  format: "json"  # Options: json, text, structured
+  
+  # Output destinations
+  console: true
+  file: null  # "/var/log/pywaf.log"
+  syslog: false
+  
+  # Access logging
+  access_log: true
+  access_log_format: "%(client_ip)s - %(method)s %(path)s - %(status_code)s - %(response_time)s ms"
+  
+  # Security logging
+  security_log: true
+  security_log_file: null  # "/var/log/pywaf-security.log"
+
+# Metrics configuration
+metrics:
+  enabled: true
+  port: 9090
+  path: "/metrics"
+  
+  # Metric collection
+  collect_system_metrics: true
+  collect_process_metrics: true
+  
+  # Custom metrics
+  custom_metrics: {}
+
+# Admin API configuration
+admin:
+  enabled: true
+  host: "127.0.0.1"  # Bind to localhost for security
+  port: 8081
+  
+  # Authentication
+  auth_enabled: true
+  username: "admin"
+  password_hash: "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8"  # 'password' - CHANGE THIS!
+  
+  # JWT settings
+  jwt_secret: "your-secret-jwt-key-change-this-in-production"  # CHANGE THIS!
+  jwt_expiry: 3600  # 1 hour
+  
+  # API settings
+  cors_enabled: false
+  cors_origins: []
+
+# Database configuration
+database:
+  url: "sqlite:///pywaf.db"
+  pool_size: 5
+  pool_timeout: 30
+  auto_migrate: true

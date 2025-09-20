@@ -1,0 +1,42 @@
+# Prometheus configuration for PyWAF monitoring
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # PyWAF metrics
+  - job_name: 'pywaf'
+    static_configs:
+      - targets: ['pywaf:9090']
+    scrape_interval: 10s
+    metrics_path: /metrics
+    
+  # PyWAF health endpoint
+  - job_name: 'pywaf-health'
+    static_configs:
+      - targets: ['pywaf:8080']
+    scrape_interval: 30s
+    metrics_path: /health
+    
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    
+  # Redis metrics (if redis-exporter is used)
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+    scrape_interval: 30s
+
+# Alerting rules (example)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets:
+#           # - alertmanager:9093
