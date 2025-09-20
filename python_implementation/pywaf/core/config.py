@@ -396,6 +396,17 @@ class AdminConfig(BaseModel):
     # API settings
     cors_enabled: bool = Field(default=False, description="Enable CORS")
     cors_origins: List[str] = Field(default_factory=list, description="Allowed CORS origins")
+    
+    @model_validator(mode='after')
+    def validate_admin_config(self):
+        if self.enabled and self.auth_enabled:
+            if not self.username:
+                raise ValueError("Admin username is required when authentication is enabled")
+            if not self.password_hash:
+                raise ValueError("Admin password_hash is required when authentication is enabled")
+            if not self.jwt_secret:
+                raise ValueError("JWT secret is required when authentication is enabled")
+        return self
 
 
 class DatabaseConfig(BaseModel):

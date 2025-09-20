@@ -225,11 +225,13 @@ admin:
   
   # Authentication
   auth_enabled: true
-  username: "admin"
-  password_hash: "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8"  # 'password' - CHANGE THIS!
+  # SECURITY: Set these values explicitly - no defaults provided
+  # Use: python -m pywaf.cli hash-password to generate secure password hash
+  username: null  # REQUIRED: Set your admin username
+  password_hash: null  # REQUIRED: Set bcrypt hash of your password
   
   # JWT settings
-  jwt_secret: "your-secret-jwt-key-change-this-in-production"  # CHANGE THIS!
+  jwt_secret: null  # REQUIRED: Set your JWT secret (use openssl rand -hex 32)
   jwt_expiry: 3600  # 1 hour
   
   # API settings

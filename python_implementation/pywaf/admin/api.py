@@ -5,13 +5,13 @@ RESTful API for managing and monitoring the PyWAF system.
 """
 
 import time
-import hashlib
 from typing import Dict, List, Optional, Any
 
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
+from passlib.context import CryptContext
 
 from ..core.config import Config
 from ..core.exceptions import AuthenticationError, AuthorizationError
@@ -67,8 +67,20 @@ class AuthManager:
     
     def __init__(self, config: Config):
         self.config = config
-        self.jwt_secret = config.admin.jwt_secret or "default-secret-change-in-production"
+        
+        # Ensure JWT secret is properly configured
+        if config.admin.auth_enabled and not config.admin.jwt_secret:
+            raise ValueError("JWT secret must be configured when authentication is enabled")
+        
+        self.jwt_secret = config.admin.jwt_secret
         self.jwt_expiry = config.admin.jwt_expiry
+        
+        # Initialize bcrypt password context for secure password hashing
+        self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    
+    def hash_password(self, password: str) -> str:
+        """Generate bcrypt hash for a password"""
+        return self.pwd_context.hash(password)
     
     def verify_password(self, username: str, password: str) -> bool:
         """Verify username and password"""
@@ -78,9 +90,12 @@ class AuthManager:
         if username != self.config.admin.username:
             return False
         
-        # Hash the provided password and compare
-        password_hash = hashlib.sha256(password.encode()).hexdigest()
-        return password_hash == self.config.admin.password_hash
+        # Use bcrypt to verify password against stored hash
+        try:
+            return self.pwd_context.verify(password, self.config.admin.password_hash)
+        except Exception:
+            # If hash format is invalid or verification fails, return False
+            return False
     
     def create_access_token(self, username: str) -> str:
         """Create JWT access token"""

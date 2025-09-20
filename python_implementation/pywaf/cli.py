@@ -642,6 +642,28 @@ async def _login_async(admin_url: str, username: Optional[str], password: Option
         raise typer.Exit(1)
 
 
+@app.command()
+def hash_password(
+    password: Optional[str] = typer.Option(None, "--password", "-p", help="Password to hash")
+):
+    """Generate bcrypt hash for a password"""
+    if not password:
+        password = typer.prompt("Password", hide_input=True)
+        confirm = typer.prompt("Confirm password", hide_input=True)
+        if password != confirm:
+            console.print("❌ Passwords do not match", style="red")
+            raise typer.Exit(1)
+    
+    from passlib.context import CryptContext
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    password_hash = pwd_context.hash(password)
+    
+    console.print("✅ Password hash generated:", style="green")
+    console.print(f"Hash: {password_hash}")
+    console.print("\nUse this hash in your configuration file:")
+    console.print(f"admin:\n  password_hash: \"{password_hash}\"", style="blue")
+
+
 # Main CLI entry point
 def main():
     """Main CLI entry point"""

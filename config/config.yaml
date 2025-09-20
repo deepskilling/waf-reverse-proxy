@@ -208,8 +208,10 @@ admin:
   port: 8081
   auth:
     enabled: true
-    username: "admin"
-    password_hash: "$argon2id$v=19$m=19456,t=2,p=1$..."
+    # SECURITY: Set these values explicitly - no defaults provided
+    # Use: cargo run -- admin hash-password to generate secure password hash
+    username: null  # REQUIRED: Set your admin username
+    password_hash: null  # REQUIRED: Set bcrypt/argon2 hash of your password
   
   endpoints:
     - path: "/config"
@@ -231,7 +233,7 @@ advanced:
   # JWT validation
   jwt:
     enabled: false
-    secret: "your-secret-key"
+    secret: null  # REQUIRED: Set your JWT secret if enabled
     algorithm: "HS256"
     required_claims: ["sub", "exp"]
   
